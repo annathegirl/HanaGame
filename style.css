@@ -1,0 +1,217 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  font-family: "Microsoft JhengHei", system-ui;
+}
+
+.hidden {
+  display: none;
+}
+
+.screen {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+/* ======================= 背景 ======================= */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  image-rendering: pixelated;
+}
+
+.bg-start {
+  background-image: url("Gemini_Generated_Image_yefmyuyefmyuyefm.png");
+}
+
+.bg-start::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 遊戲背景滾動 */
+.bg-game {
+  background-image: url("Gemini_Generated_Image_yefmyuyefmyuyefm.png");
+  animation: scroll-bg 10s linear infinite;
+}
+
+@keyframes scroll-bg {
+  from { background-position-x: 0; }
+  to { background-position-x: -1024px; }
+}
+
+/* ======================= 首頁登入框 ======================= */
+.start-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.pixel-panel {
+  background: #222;
+  color: #eee;
+  padding: 24px 32px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 4px #111, 0 0 0 8px #444;
+  text-align: center;
+}
+
+.game-title {
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.pixel-btn {
+  padding: 10px 30px;
+  font-size: 18px;
+  color: #fff;
+  background: #555;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px #111;
+}
+
+.pixel-btn:active {
+  transform: translateY(2px);
+}
+
+/* ======================= 遊戲世界 ======================= */
+#game-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#game-world {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 主角 */
+#player {
+  position: absolute;
+  left: 80px;
+  bottom: 180px;
+  height: 160px;
+  image-rendering: pixelated;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ======================= 障礙物 ======================= */
+#obstacle-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.obstacle {
+  position: absolute;
+  bottom: 180px;
+  image-rendering: pixelated;
+  max-height: 170px;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
+/* 小障礙物 */
+.obstacle.low {
+  max-height: 110px;      /* 小物體 */
+}
+
+/* 大障礙物 */
+.obstacle.high {
+  max-height: 220px;     /* 大物體（高障礙） */
+}
+
+/* ======================= 分數 ======================= */
+#score-panel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+  color: white;
+  border-radius: 4px;
+}
+
+/* 飄起分數 */
+.float-score {
+  position: absolute;
+  color: yellow;
+  font-weight: bold;
+  font-size: 18px;
+  text-shadow: 0 0 3px #000;
+  animation: float-up 0.8s ease-out forwards;
+}
+
+@keyframes float-up {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to   { opacity: 0; transform: translate(-50%, -50px); }
+}
+
+/* ======================= Game Over 掃描 ======================= */
+#game-over-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scan-layer {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  clip-path: inset(0 0 100% 0);
+}
+
+#game-over-overlay.active .scan-layer {
+  animation: scan-down 1.5s steps(10) forwards;
+}
+
+@keyframes scan-down {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0    0); }
+}
+
+.game-over-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#game-over-overlay.show-text .game-over-text {
+  opacity: 1;
+}
+
+.go-title {
+  font-size: 32px;
+  margin-bottom: 10px;
+}

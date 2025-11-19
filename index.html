@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <title>小花跳跳大冒險</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+
+    <!-- ★★★ 永久背景（不會被 hidden 隱藏）★★★ -->
+    <div id="global-bg"></div>
+
+    <!-- ====== 首頁 ====== -->
+    <section id="start-screen" class="screen">
+      <div class="start-inner">
+        <div class="pixel-panel">
+          <h1 class="game-title">小花跳跳大冒險</h1>
+
+          <button id="btn-start" class="pixel-btn">Start</button>
+
+          <div class="high-score">
+            最高分：<span id="high-score-text">0</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 遊戲畫面 ====== -->
+    <section id="game-screen" class="screen hidden">
+      <div id="game-container">
+        <div id="game-world">
+
+          <img id="player" src="IMG_8331.png" />
+
+          <div id="obstacle-container"></div>
+
+          <div id="score-panel">
+            分數：<span id="score-text">0</span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== Game Over 黑幕 ====== -->
+    <div id="game-over-overlay" class="hidden">
+      <div class="scan-layer"></div>
+      <div class="game-over-text">
+        <div class="go-title">Game Over</div>
+        <div class="go-score">得分：<span id="final-score-text">0</span></div>
+      </div>
+    </div>
+
+    <script src="game.js"></script>
+  </body>
+</html>
+
