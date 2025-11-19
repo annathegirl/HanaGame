@@ -1,69 +1,59 @@
-
+/* ===========================================
+   共同設定
+=========================================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
   width: 100%;
   height: 100%;
-  background: #000;
   overflow: hidden;
   font-family: "Microsoft JhengHei", system-ui;
+ 
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 
 .screen {
   width: 100vw;
   height: 100vh;
   position: relative;
+  
 }
 
-/* ======================= 背景 ======================= */
-.bg-layer {
-  position: absolute;
+/* ===========================================
+   永久背景
+=========================================== */
+#global-bg {
+  position: fixed;
   inset: 0;
+  background-image: url("Gemini_Generated_Image_yefmyuyefmyuyefm.png");
   background-repeat: repeat-x;
-  background-size: auto 100%;
+  background-size: contain;
+  background-position: bottom;
+  z-index: -10;
   image-rendering: pixelated;
-}
-
-.bg-start {
-  background-image: url("Gemini_Generated_Image_yefmyuyefmyuyefm.png");
-}
-
-.bg-start::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* 遊戲背景滾動 */
-.bg-game {
-  background-image: url("Gemini_Generated_Image_yefmyuyefmyuyefm.png");
-  animation: scroll-bg 10s linear infinite;
+  animation: scroll-bg 10s linear infinite; /* ★ B2 滾動背景 */
 }
 
 @keyframes scroll-bg {
   from { background-position-x: 0; }
-  to { background-position-x: -1024px; }
+  to   { background-position-x: -1024px; }
 }
 
-/* ======================= 首頁登入框 ======================= */
+/* ===========================================
+   首頁登入框
+=========================================== */
 .start-inner {
-  position: relative;
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  z-index: 10;
 }
 
 .pixel-panel {
@@ -94,10 +84,11 @@ body {
   transform: translateY(2px);
 }
 
-/* ======================= 遊戲世界 ======================= */
+/* ===========================================
+   遊戲世界
+=========================================== */
 #game-container {
-  position: relative;
-  width: 100%;
+   width: 100%;
   height: 100%;
 }
 
@@ -120,7 +111,9 @@ body {
   pointer-events: none;
 }
 
-/* ======================= 障礙物 ======================= */
+/* ===========================================
+   障礙物
+=========================================== */
 #obstacle-container {
   position: absolute;
   width: 100%;
@@ -130,31 +123,25 @@ body {
 .obstacle {
   position: absolute;
   bottom: 180px;
-  image-rendering: pixelated;
   max-height: 170px;
-  height: auto;
-  user-select: none;
-  pointer-events: none;
-}
-/* 小障礙物 */
-.obstacle.low {
-  max-height: 110px;      /* 小物體 */
+  image-rendering: pixelated;
 }
 
-/* 大障礙物 */
-.obstacle.high {
-  max-height: 220px;     /* 大物體（高障礙） */
-}
+.obstacle.low { max-height: 110px; }
+.obstacle.high { max-height: 220px; }
 
-/* ======================= 分數 ======================= */
+/* ===========================================
+   分數
+=========================================== */
 #score-panel {
   position: absolute;
   top: 16px;
-  left: 16px;
-  background: rgba(0, 0, 0, 0.5);
+  left: 150px; /* 你要的調整 */
+  background: rgba(0,0,0,0.5);
   padding: 6px 12px;
   color: white;
   border-radius: 4px;
+  z-index: 50;   /* ★ 新增這行，保證在最上層 */
 }
 
 /* 飄起分數 */
@@ -162,9 +149,9 @@ body {
   position: absolute;
   color: yellow;
   font-weight: bold;
-  font-size: 18px;
-  text-shadow: 0 0 3px #000;
-  animation: float-up 0.8s ease-out forwards;
+  font-size: 25px;
+  text-shadow: 0 0 5px #000;
+  animation: float-up 1s ease-out forwards;
 }
 
 @keyframes float-up {
@@ -172,17 +159,21 @@ body {
   to   { opacity: 0; transform: translate(-50%, -50px); }
 }
 
-/* ======================= Game Over 掃描 ======================= */
+/* ===========================================
+   Game Over 掃描
+=========================================== */
 #game-over-overlay {
   position: fixed;
   inset: 0;
   pointer-events: none;
+  z-index: 20;
 }
 
 .scan-layer {
   position: absolute;
   inset: 0;
   background: #000;
+  opacity: 0.85;
   clip-path: inset(0 0 100% 0);
 }
 
@@ -192,7 +183,7 @@ body {
 
 @keyframes scan-down {
   from { clip-path: inset(0 0 100% 0); }
-  to   { clip-path: inset(0 0 0    0); }
+  to   { clip-path: inset(0 0 0 0); }
 }
 
 .game-over-text {
@@ -200,18 +191,15 @@ body {
   inset: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   color: white;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s;
 }
 
 #game-over-overlay.show-text .game-over-text {
   opacity: 1;
 }
 
-.go-title {
-  font-size: 32px;
-  margin-bottom: 10px;
-}
+.go-title { font-size: 32px; margin-bottom: 10px; }

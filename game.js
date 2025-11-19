@@ -5,7 +5,8 @@
 const GROUND = 180;
 const PLAYER_X = 100;
 
-let gameState = "MENU"; // MENU, PLAYING, GAMEOVER
+let gameState = "MENU";
+let playerName = "玩家";
 
 let playerBottom = GROUND;
 let playerVy = 0;
@@ -23,17 +24,16 @@ let lastTime = null;
 let score = 0;
 let highScore = 0;
 
-// 障礙物圖片
+// 圖片
 const lowImgs = ["IMG_8329.png", "IMG_8337.png", "IMG_8338.png", "IMG_8341.png"];
 const highImgs = ["unnamed.png", "IMG_8330.png", "IMG_8339.png", "IMG_8340.png"];
 
 // ============================================
-// DOM 物件
+// DOM
 // ============================================
 
 const startScreen = document.getElementById("start-screen");
 const gameScreen = document.getElementById("game-screen");
-
 const btnStart = document.getElementById("btn-start");
 
 const playerEl = document.getElementById("player");
@@ -46,20 +46,42 @@ const gameOverOverlay = document.getElementById("game-over-overlay");
 const finalScoreText = document.getElementById("final-score-text");
 
 // ============================================
-// 高分
+// 高分紀錄
 // ============================================
 
 function loadHighScore() {
-  const saved = parseInt(localStorage.getItem("hana_highscore") || "0");
-  highScore = saved;
-  highScoreText.textContent = highScore;
+  let saved = localStorage.getItem("hana_highscore");
+
+  if (!saved) {
+    highScoreText.textContent = "無紀錄";
+    highScore = 0;
+    return;
+  }
+
+  try {
+    saved = JSON.parse(saved);
+  } catch {
+    // 舊資料格式錯誤 → 清掉
+    localStorage.removeItem("hana_highscore");
+    highScoreText.textContent = "無紀錄";
+    return;
+  }
+
+  if (!saved.name || typeof saved.score !== "number") {
+    highScoreText.textContent = "無紀錄";
+    return;
+  }
+
+  highScore = saved.score;
+  highScoreText.textContent = `${saved.name}：${saved.score}`;
 }
 
 function saveHighScore() {
   if (score > highScore) {
+    const data = { name: playerName, score: score };
+    localStorage.setItem("hana_highscore", JSON.stringify(data));
     highScore = score;
-    localStorage.setItem("hana_highscore", highScore);
-    highScoreText.textContent = highScore;
+    highScoreText.textContent = `${playerName}：${score}`;
   }
 }
 
@@ -67,7 +89,13 @@ function saveHighScore() {
 // 遊戲流程
 // ============================================
 
-btnStart.onclick = () => startGame();
+btnStart.onclick = () => {
+  let name = prompt("請輸入玩家名稱：");
+  if (!name || name.trim() === "") name = "玩家";
+  playerName = name.trim();
+
+  startGame();
+};
 
 function startGame() {
   gameState = "PLAYING";
@@ -78,7 +106,7 @@ function startGame() {
   playerVy = 0;
   jumpCount = 0;
 
-  obstacles.forEach((o) => o.el.remove());
+  obstacles.forEach(o => o.el.remove());
   obstacles = [];
   spawnTimer = 0;
   lastTime = null;
@@ -102,10 +130,13 @@ function gameOver() {
   showGameOver();
 
   setTimeout(() => {
+
     gameScreen.classList.add("hidden");
+    hideGameOver();
     startScreen.classList.remove("hidden");
+
     gameState = "MENU";
-  }, 2000);
+  }, 4000);
 }
 
 // ============================================
@@ -156,7 +187,6 @@ function doJump() {
 // 障礙物
 // ============================================
 
-// 重要：用 right 移動（避免 transform 造成 hitbox 失效）
 function spawnObstacle() {
   const isHigh = Math.random() < 0.5;
   const src = isHigh ? random(highImgs) : random(lowImgs);
@@ -165,7 +195,6 @@ function spawnObstacle() {
   el.src = src;
   el.className = "obstacle";
 
-  // ★★★ 加上 class 讓 CSS 可以控制大小 ★★★
   if (isHigh) el.classList.add("high");
   else el.classList.add("low");
 
@@ -173,15 +202,12 @@ function spawnObstacle() {
 
   obstacleContainer.appendChild(el);
 
-  const obs = {
+  obstacles.push({
     el,
     x: window.innerWidth,
-    width: 120,  // 邏輯寬度，與顯示無關
     isHigh,
-    scored: false,
-  };
-
-  obstacles.push(obs);
+    scored: false
+  });
 }
 
 function updateObstacles(dt) {
@@ -193,73 +219,62 @@ function updateObstacles(dt) {
 
   const speed = 6;
 
-  obstacles.forEach((o) => {
+  obstacles.forEach(o => {
     o.x -= speed * dt;
     o.el.style.right = `${window.innerWidth - o.x}px`;
   });
 
-  obstacles = obstacles.filter((o) => {
-    // 得分
+  obstacles = obstacles.filter(o => {
     if (!o.scored && o.x < PLAYER_X) {
       o.scored = true;
       const gain = o.isHigh ? 25 + Math.floor(Math.random() * 16) : 10;
-      addScore(gain, o);
+      addScore(gain);
     }
 
-    // 出畫面左側刪除
     if (o.x > -200) return true;
-
     o.el.remove();
     return false;
   });
 }
 
-function addScore(amount, obs) {
+function addScore(amount) {
   score += amount;
   scoreText.textContent = score;
 
-  const rect = obs.el.getBoundingClientRect();
+  const p = playerEl.getBoundingClientRect();
+
   const float = document.createElement("div");
   float.className = "float-score";
   float.textContent = `+${amount}`;
-  float.style.left = rect.left + rect.width / 2 + "px";
-  float.style.top = rect.top + "px";
+  float.style.left = (p.left + p.width / 2) + "px";
+  float.style.top = (p.top - 40) + "px";
+
   document.body.appendChild(float);
 
   setTimeout(() => float.remove(), 900);
 }
 
 // ============================================
-// 碰撞（方法一：加入安全距離 padding）
+// 碰撞
 // ============================================
 
 function checkCollision() {
-  const padding = 30; // <<< 安全距離越大 -> 越不容易撞到（建議 10~25）
+  const padding = 30;
 
   const p = playerEl.getBoundingClientRect();
-
-  // 主角的碰撞框縮小 padding
-  const pLeft   = p.left   + padding;
-  const pRight  = p.right  - padding;
-  const pTop    = p.top    + padding;
-  const pBottom = p.bottom - padding;
+  const pL = p.left + padding;
+  const pR = p.right - padding;
+  const pT = p.top + padding;
+  const pB = p.bottom - padding;
 
   for (const o of obstacles) {
     const r = o.el.getBoundingClientRect();
+    const rL = r.left + padding;
+    const rR = r.right - padding;
+    const rT = r.top + padding;
+    const rB = r.bottom - padding;
 
-    // 障礙物的碰撞框也縮小 padding
-    const rLeft   = r.left   + padding;
-    const rRight  = r.right  - padding;
-    const rTop    = r.top    + padding;
-    const rBottom = r.bottom - padding;
-
-    // AABB 碰撞檢查
-    if (!(
-      pRight < rLeft ||
-      pLeft > rRight ||
-      pBottom < rTop ||
-      pTop > rBottom
-    )) {
+    if (!(pR < rL || pL > rR || pB < rT || pT > rB)) {
       gameOver();
       return;
     }
@@ -288,11 +303,10 @@ function hideGameOver() {
 // 輸入
 // ============================================
 
-window.addEventListener("keydown", (e) => {
+window.addEventListener("keydown", e => {
   if (e.code === "Space" || e.code === "ArrowUp") {
     e.preventDefault();
     if (gameState === "PLAYING") doJump();
-    else if (gameState === "MENU") startGame();
   }
 });
 
@@ -300,7 +314,7 @@ window.addEventListener("mousedown", () => {
   if (gameState === "PLAYING") doJump();
 });
 
-window.addEventListener("touchstart", (e) => {
+window.addEventListener("touchstart", e => {
   e.preventDefault();
   if (gameState === "PLAYING") doJump();
 });
